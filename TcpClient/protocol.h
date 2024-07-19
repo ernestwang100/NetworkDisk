@@ -11,6 +11,9 @@ typedef unsigned int uint;
 #define LOGIN_OK "login ok"
 #define LOGIN_FAILED "login failed: name or password might existed or wrong"
 
+#define SEARCH_USR_NO "no such person"
+#define SEARCH_USR_ONLINE "online"
+#define SEARCH_USR_OFFLINE "offline"
 enum ENUM_MSG_TYPE
 {
     ENUM_MSG_TYPE_MIN = 0,
@@ -18,8 +21,10 @@ enum ENUM_MSG_TYPE
     ENUM_MSG_TYPE_REGIST_RESPOND,
     ENUM_MSG_TYPE_LOGIN_REQUEST,
     ENUM_MSG_TYPE_LOGIN_RESPOND,
-    // ENUM_MSG_TYPE_REQUEST,
-    // ENUM_MSG_TYPE_RESPOND,
+    ENUM_MSG_TYPE_ALL_ONLINE_REQUEST,
+    ENUM_MSG_TYPE_ALL_ONLINE_RESPOND,
+    ENUM_MSG_TYPE_SEARCH_USR_REQUEST,
+    ENUM_MSG_TYPE_SEARCH_USR_RESPOND,
     // ENUM_MSG_TYPE_REQUEST,
     // ENUM_MSG_TYPE_RESPOND,
     ENUM_MSG_TYPE_MAX = 0x00ffffff

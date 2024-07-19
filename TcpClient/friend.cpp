@@ -1,4 +1,8 @@
 #include "friend.h"
+#include "protocol.h"
+#include "tcpclient.h"
+#include <QInputDialog>
+#include <QDebug>
 
 Friend::Friend(QWidget *parent)
     : QWidget{parent}
@@ -40,6 +44,16 @@ Friend::Friend(QWidget *parent)
     setLayout(pMain);
 
     connect(m_pShownOnineUsrPB, SIGNAL(clicked(bool)), this, SLOT(showOnline()));
+    connect(m_pSearchUsrPB, SIGNAL(clicked(bool)), this, SLOT(searchUsr()));
+}
+
+void Friend::showAllOnlineUsr(PDU *pdu)
+{
+    if (NULL == pdu)
+    {
+        return;
+    }
+    m_pOnline -> showUsr(pdu);
 }
 
 void Friend::showOnline()
@@ -47,9 +61,33 @@ void Friend::showOnline()
     if (m_pOnline -> isHidden())
     {
         m_pOnline -> show();
+
+        PDU *pdu = mkPDU(0);
+        pdu -> uiMsgType = ENUM_MSG_TYPE_ALL_ONLINE_REQUEST;
+        TcpClient::getinstance().getTcpSocket().write((char*)pdu, pdu -> uiPDULen);
+        free(pdu);
+        pdu = NULL;
     }
     else
     {
         m_pOnline -> hide();
     }
 }
+
+void Friend::searchUsr()
+{
+    m_strSearchName  = QInputDialog::getText(this, "Search", "Username: ");
+    if (!m_strSearchName.isEmpty())
+    {
+        qDebug() << m_strSearchName;
+        PDU *pdu = mkPDU(0);
+        std::string searchNameStdStr = m_strSearchName.toStdString();
+        memcpy(pdu->caData, searchNameStdStr.c_str(), searchNameStdStr.size());
+        pdu->caData[searchNameStdStr.size()] = '\0';  // Null-terminate the string in the PDU data
+        pdu->uiMsgType = ENUM_MSG_TYPE_SEARCH_USR_REQUEST;
+        TcpClient::getinstance().getTcpSocket().write((char*)pdu, pdu->uiPDULen);
+        free(pdu);
+        pdu = NULL;
+    }
+}
+

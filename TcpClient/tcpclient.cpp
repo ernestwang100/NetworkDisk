@@ -49,6 +49,17 @@ void TcpClient::loadCnfig()
     }
 }
 
+TcpClient &TcpClient::getinstance()
+{
+    static TcpClient instance;
+    return instance;
+}
+
+QTcpSocket &TcpClient::getTcpSocket()
+{
+    return m_tcpSocket;
+}
+
 void TcpClient::showConnect()
 {
     QMessageBox::information(this, "connect to server", "connect sucessful");
@@ -82,12 +93,39 @@ void TcpClient::recvMsg()
         if (0 == strcmp(pdu->caData, LOGIN_OK))
         {
             QMessageBox::information(this, "Login", LOGIN_OK);
+            OpeWidget::getInstance().show();
+            hide();
         }
         else if (0 == strcmp(pdu->caData, LOGIN_FAILED))
         {
             QMessageBox::information(this, "Login", LOGIN_FAILED);
 
         }
+    }
+
+    case ENUM_MSG_TYPE_ALL_ONLINE_RESPOND:
+    {
+        OpeWidget::getInstance().getFriend() -> showAllOnlineUsr(pdu);
+        break;
+    }
+
+    case ENUM_MSG_TYPE_SEARCH_USR_RESPOND:
+    {
+        if (0 == strcmp(SEARCH_USR_NO, pdu -> caData))
+        {
+            QMessageBox::information(this, "Searching", QString("%1: not exist").arg(OpeWidget::getInstance().getFriend() -> m_strSearchName));
+        }
+        else if (0 == strcmp(SEARCH_USR_ONLINE, pdu -> caData))
+        {
+            QMessageBox::information(this, "Searching", QString("%1: online").arg(OpeWidget::getInstance().getFriend() -> m_strSearchName));
+
+        }
+        else if (0 == strcmp(SEARCH_USR_OFFLINE, pdu -> caData))
+        {
+            QMessageBox::information(this, "Searching", QString("%1: offline").arg(OpeWidget::getInstance().getFriend() -> m_strSearchName));
+
+        }
+        break;
     }
     default:
         break;

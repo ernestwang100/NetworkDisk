@@ -15,11 +15,14 @@ class Friend : public QWidget
     Q_OBJECT
 public:
     explicit Friend(QWidget *parent = nullptr);
+    void showAllOnlineUsr(PDU *pdu);
+    QString m_strSearchName;
 
 signals:
 
 public slots:
    void showOnline();
+    void searchUsr();
 
 private:
     QTextEdit *m_pShowMsgTE;
