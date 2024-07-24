@@ -18,6 +18,9 @@ public:
 
     void showUsr(PDU *pdu);
 
+private slots:
+    void on_addfriend_pb_clicked();
+
 private:
     Ui::Online *ui;
 };

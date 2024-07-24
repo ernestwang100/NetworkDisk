@@ -1,5 +1,6 @@
 #include "mytcpsocket.h"
 #include <QDebug>
+#include "mytcpserver.h"
 
 MyTcpSocket::MyTcpSocket() {
     connect(this, SIGNAL(readyRead()), this, SLOT(recvMsg()));
@@ -111,6 +112,58 @@ void MyTcpSocket::recvMsg()
         respdu = NULL;
         break;
     }
+    case ENUM_MSG_TYPE_ADD_FRIEND_REQUEST:
+    {
+        char caPerName[32] = {'\0'};
+        char caName[32] = {'\0'};
+        strncpy(caPerName, pdu->caData, 32);
+        strncpy(caName, pdu->caData+32, 32);
+        int ret = OpeDB::getInstance().handleAddFriend(caPerName, caName);
+        qDebug() <<"ret =" << ret;
+        PDU *respdu = NULL;
+        if (-1 == ret)
+        {
+            respdu = mkPDU(0);
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_RESPOND;
+            strcpy(respdu -> caData, UNKOWN_ERROR);
+            write((char*)respdu, respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+        else if (0 == ret)
+        {
+            respdu = mkPDU(0);
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_RESPOND;
+            strcpy(respdu -> caData, EXISTED_FRIEND);
+            write((char*)respdu, respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+        else if (1 == ret)
+        {
+            MyTcpServer::getInstance().resend(caPerName, pdu);
+        }
+        else if (2 == ret)
+        {
+            respdu = mkPDU(0);
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_RESPOND;
+            strcpy(respdu -> caData, ADD_FRIEND_OFFLINE);
+            write((char*)respdu, respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+        else if (3 == ret)
+        {
+            respdu = mkPDU(0);
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_RESPOND;
+            strcpy(respdu -> caData, ADD_FRIEND_NONEXIST);
+            write((char*)respdu, respdu->uiPDULen);
+            free(respdu);
+            respdu = NULL;
+        }
+        break;
+    }
+
     default:
         break;
     }

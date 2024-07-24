@@ -14,6 +14,8 @@ public:
 
     void incomingConnection(qintptr socketDescriptor);
 
+    void resend(const char *pername, PDU *pdu);
+
 public slots:
     void deletSocket(MyTcpSocket *mysocket);
 

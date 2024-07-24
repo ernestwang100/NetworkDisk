@@ -131,3 +131,50 @@ int OpeDB::handleSearchUsr(const char *name)
         return -1;
     }
 }
+
+int OpeDB::handleAddFriend(const char *pername, const char *name)
+{
+    if (NULL == pername || NULL == name)
+    {
+        return -1;
+    }
+    QString data = QString("select * from friend "
+                           "where (id = (select id from userInfo where name = \'%1\') and "
+                           "friendId = (select id from userInfo where name = \'%2\')) or "
+                           "(id = (select id from userInfo where name = \'%3\') and "
+                           "friendId = (select id from userInfo where name = \'%4\'))")
+                       .arg(pername).arg(name).arg(name).arg(pername);
+
+    qDebug() << data;
+    QSqlQuery query;
+    query.exec (data);
+    if (query.next())
+    {
+        return 0; //friend already
+    }
+    else
+    {
+        data = QString("select online from userInfo where name = \'%1\'").arg(pername);
+        qDebug() << data;
+        QSqlQuery query;
+        query.exec(data);
+        if (query.next())
+        {
+            qDebug() << query.value(0).toInt();
+            int ret = query.value(0).toInt();
+            if (1 == ret)
+            {
+                return 1; //online
+            }
+            else if (0 == ret)
+            {
+                return 2; //offline
+            }
+        }
+        else
+        {
+            return 3;
+        }
+    }
+
+}

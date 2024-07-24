@@ -14,6 +14,11 @@ typedef unsigned int uint;
 #define SEARCH_USR_NO "no such person"
 #define SEARCH_USR_ONLINE "online"
 #define SEARCH_USR_OFFLINE "offline"
+
+#define UNKOWN_ERROR "unkown Error"
+#define EXISTED_FRIEND "friend exist"
+#define ADD_FRIEND_OFFLINE "user offline"
+#define ADD_FRIEND_NONEXIST "user not exit"
 enum ENUM_MSG_TYPE
 {
     ENUM_MSG_TYPE_MIN = 0,
@@ -25,8 +30,11 @@ enum ENUM_MSG_TYPE
     ENUM_MSG_TYPE_ALL_ONLINE_RESPOND,
     ENUM_MSG_TYPE_SEARCH_USR_REQUEST,
     ENUM_MSG_TYPE_SEARCH_USR_RESPOND,
+    ENUM_MSG_TYPE_ADD_FRIEND_REQUEST,
+    ENUM_MSG_TYPE_ADD_FRIEND_RESPOND,
+
     // ENUM_MSG_TYPE_REQUEST,
-    // ENUM_MSG_TYPE_RESPOND,
+    // ENUM_MSG_TYPE_ RESPOND,
     ENUM_MSG_TYPE_MAX = 0x00ffffff
 };
 

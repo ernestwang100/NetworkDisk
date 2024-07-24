@@ -60,6 +60,11 @@ QTcpSocket &TcpClient::getTcpSocket()
     return m_tcpSocket;
 }
 
+QString TcpClient::loginName()
+{
+    return m_strLoginName;
+}
+
 void TcpClient::showConnect()
 {
     QMessageBox::information(this, "connect to server", "connect sucessful");
@@ -127,6 +132,33 @@ void TcpClient::recvMsg()
         }
         break;
     }
+    case ENUM_MSG_TYPE_ADD_FRIEND_REQUEST:
+    {
+        char caMySelf[32] = {'\0'};
+        char caName[32] = {'\0'};
+        strncpy(caName, pdu -> caData + 32, 32);
+        int ret = QMessageBox::information(this, "friend request", QString("%1 want to be your friend, accept?").arg(caName), QMessageBox:: yes, QMessageBox::NO);
+        PDU *respdu = mkPDU(0);
+        memcpy(respdu -> caData, pdu -> caData, 32);
+        if (QMessageBox::Yes == ret)
+        {
+            respdu.uiMsType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
+        }
+        else
+        {
+            respdu.uiMsType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
+        }
+        m_tcpSocket.write((char*) respdu, respdu -> uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+
+    }
+    case ENUM_MSG_TYPE_ADD_FRIEND_RESPOND:
+    {
+        QMessageBox::information(this, "add friend", pdu -> caData);
+        break;
+    }
     default:
         break;
     }
@@ -161,6 +193,7 @@ void TcpClient::on_login_pb_clicked()
     QString strPwd = ui->pwd_le->text();
     if (!strName.isEmpty() && !strPwd.isEmpty())
     {
+        m_strLoginName = strName;
         PDU *pdu = mkPDU(0);
         pdu->uiMsgType = ENUM_MSG_TYPE_LOGIN_REQUEST;
         strncpy(pdu->caData, strName.toStdString().c_str(), 32);
