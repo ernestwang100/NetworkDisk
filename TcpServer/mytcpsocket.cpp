@@ -20,6 +20,7 @@ void MyTcpSocket::recvMsg()
     uint uiMsgLen = uiPDULen - sizeof(PDU);
     PDU *pdu =  mkPDU(uiMsgLen);
     this->read((char*)pdu+sizeof(uint), uiPDULen-sizeof(uint));
+    qDebug() << "Message Type:" << (ENUM_MSG_TYPE)pdu->uiMsgType;
     switch (pdu->uiMsgType)
     {
     case ENUM_MSG_TYPE_REGIST_REQUEST:
@@ -164,6 +165,26 @@ void MyTcpSocket::recvMsg()
         break;
     }
 
+
+    case ENUM_MSG_TYPE_FLUSH_FRIEND_REQUEST:
+    {
+        qDebug() << "flush friend request";
+        char caName[32] = {'\0'};
+        strncpy(caName, pdu->caData, 32);
+        qDebug() << caName;
+        QStringList ret = OpeDB::getInstance().handleFlushFriend(caName);
+        uint uiMsgLen = ret.size() * 32;
+        PDU *respdu = mkPDU(uiMsgLen);
+        respdu -> uiMsgType = ENUM_MSG_TYPE_FLUSH_FRIEND_RESPOND;
+        for (int i = 0; i < ret.size(); i++)
+        {
+            memcpy((char*)(respdu -> caMsg) + i * 32, ret.at(i).toStdString().c_str(), ret.at(i).size());
+        }
+        write((char*)respdu, respdu->uiPDULen);
+        free(respdu);
+        respdu = NULL;
+        break;
+    }
     default:
         break;
     }

@@ -26,7 +26,7 @@ void OpeDB::init()
         {
             while (query.next())
             {
-                QString data = QString("%1,%2,%3").arg(query.value(0).toString()).arg(query.value(1).toString()).arg(query.value(2).toString());
+                QString data = QString("%1,%2,%3,%4").arg(query.value(0).toString()).arg(query.value(1).toString()).arg(query.value(2).toString()).arg(query.value(3).toString());
                 qDebug() << data;
                 // ui -> textEdit -> append(data);
             }
@@ -97,7 +97,7 @@ void OpeDB::handleOffline(const char *name)
 QStringList OpeDB::handleAllOnline()
 {
     QString data = QString("select name from userInfo where online = 1");
-    qDebug() << data;
+    // qDebug() << data;
     QSqlQuery query;
     query.exec(data);
     QStringList result;
@@ -118,7 +118,7 @@ int OpeDB::handleSearchUsr(const char *name)
         return -1;
     }
     QString data = QString("select online from userInfo where name = \'%1\'").arg(name);
-    qDebug() << data;
+    // qDebug() << data;
     QSqlQuery query;
     query.exec(data);
     if (query.next())
@@ -177,4 +177,59 @@ int OpeDB::handleAddFriend(const char *pername, const char *name)
         }
     }
 
+}
+
+void OpeDB::handleAgreeAddFriend(const char *pername, const char *name)
+{
+    if (NULL == pername || NULL == name)
+    {
+        return;
+    }
+    QString data = QString("insert into friend(id, friendId) values ((select id from userInfo where name = \'%1\'), (select id from userInfo where name = \'%2\'))").arg(pername).arg(name);
+    QSqlQuery query;
+    query.exec(data);
+}
+
+QStringList OpeDB::handleFlushFriend(const char *name)
+{
+    QStringList strFriendList;
+    strFriendList.clear();
+    if (NULL == name)
+    {
+        return strFriendList;
+    }
+    QString strQuery = QString("select id from userInfo where name = \'%1\' and online = 1 ").arg(name);
+    qDebug() << strQuery;
+    QSqlQuery query;
+    int iId = -1; // 请求方name对应的id
+    query.exec(strQuery);
+    if (query.next())
+    {
+        iId = query.value(0).toInt();
+        qDebug() << "iId =" << iId;
+    }
+
+
+    // 查询好友信息表与用户信息表获取好友列表
+    strQuery = QString("select name, online from userInfo "
+                       "where id in "
+                       "(select friendId from friend "
+                       "where id = %1 "
+                       "union "
+                       "select id from friend "
+                       "where friendId = %2)").arg(iId).arg(iId);
+    query.exec(strQuery);
+    while(query.next())
+    {
+        char friName[32];
+        char friOnline[4];
+        strncpy(friName, query.value(0).toString().toStdString().c_str(), 32);
+        strncpy(friOnline, query.value(1).toString().toStdString().c_str(), 4);
+        strFriendList.append(friName);
+        strFriendList.append(friOnline);
+        qDebug() << "好友信息 " << friName << " " << friOnline;
+        qDebug() << strFriendList;
+    }
+
+    return strFriendList; // 返回查询到所有在线用户的姓名
 }

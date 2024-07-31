@@ -20,6 +20,8 @@ public:
     QStringList handleAllOnline();
     int handleSearchUsr(const char *name);
     int handleAddFriend(const char *pername, const char *name);
+    void handleAgreeAddFriend(const char *pername, const char *name);
+    QStringList handleFlushFriend(const char *name);
 signals:
 
 public slots:

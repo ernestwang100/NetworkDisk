@@ -137,16 +137,16 @@ void TcpClient::recvMsg()
         char caMySelf[32] = {'\0'};
         char caName[32] = {'\0'};
         strncpy(caName, pdu -> caData + 32, 32);
-        int ret = QMessageBox::information(this, "friend request", QString("%1 want to be your friend, accept?").arg(caName), QMessageBox:: yes, QMessageBox::NO);
+        int ret = QMessageBox::information(this, "friend request", QString("%1 want to be your friend, accept?").arg(caName), QMessageBox:: Yes, QMessageBox::No);
         PDU *respdu = mkPDU(0);
         memcpy(respdu -> caData, pdu -> caData, 32);
         if (QMessageBox::Yes == ret)
         {
-            respdu.uiMsType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
         }
         else
         {
-            respdu.uiMsType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
+            respdu -> uiMsgType = ENUM_MSG_TYPE_ADD_FRIEND_AGREE;
         }
         m_tcpSocket.write((char*) respdu, respdu -> uiPDULen);
         free(respdu);
@@ -157,6 +157,22 @@ void TcpClient::recvMsg()
     case ENUM_MSG_TYPE_ADD_FRIEND_RESPOND:
     {
         QMessageBox::information(this, "add friend", pdu -> caData);
+        break;
+    }
+
+    case ENUM_MSG_TYPE_ADD_FRIEND_AGREE:
+    {
+        QMessageBox::information(this, "add friend", QString("%1 accept your friend request！").arg(pdu -> caData));
+        break;
+    }
+    case ENUM_MSG_TYPE_ADD_FRIEND_REFUSE:
+    {
+        QMessageBox::information(this, "add friend", QString("%1 decline your friend request！").arg(pdu -> caData));
+        break;
+    }
+    case ENUM_MSG_TYPE_FLUSH_FRIEND_RESPOND:
+    {
+        OpeWidget::getInstance().getFriend()->updateFriendList(pdu);
         break;
     }
     default:
