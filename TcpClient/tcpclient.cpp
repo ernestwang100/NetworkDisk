@@ -175,6 +175,18 @@ void TcpClient::recvMsg()
         OpeWidget::getInstance().getFriend()->updateFriendList(pdu);
         break;
     }
+    case ENUM_MSG_TYPE_DELETE_FRIEND_REQUEST:
+    {
+        char caName[32] = {'\0'};
+        memcpy(caName, pdu -> caData, 32);
+        QMessageBox::information(this, "Delete friend", QString("%1 delete you as his friend").arg(caName));
+        break;
+    }
+    case ENUM_MSG_TYPE_DELETE_FRIEND_RESPOND:
+    {
+        QMessageBox::information(this, "Delete friend", "Delete successfully");
+        break;
+    }
     default:
         break;
     }

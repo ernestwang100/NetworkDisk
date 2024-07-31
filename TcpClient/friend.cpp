@@ -124,7 +124,18 @@ void Friend::flushFriend()
 
 void Friend::delFriend()
 {
-    QString strName = m_pFriendlistWidget -> currentItem() -> text();
-    qDebug() << strName;
+    if (NULL != m_pFriendlistWidget -> currentItem())
+    {
+        QString strFriendName = m_pFriendlistWidget -> currentItem() -> text();
+        PDU *pdu = mkPDU(0);
+        pdu -> uiMsgType = ENUM_MSG_TYPE_DELETE_FRIEND_REQUEST;
+        QString strSelfName = TcpClient::getinstance().loginName();
+        memcpy(pdu -> caData, strSelfName.toStdString().c_str(), strSelfName.size());
+        memcpy(pdu -> caData + 32, strFriendName.toStdString().c_str(), strFriendName.size());
+        TcpClient::getinstance().getTcpSocket().write((char*)pdu, pdu->uiPDULen);
+        free(pdu);
+        pdu = NULL;
+    }
+
 }
 

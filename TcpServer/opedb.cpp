@@ -233,3 +233,20 @@ QStringList OpeDB::handleFlushFriend(const char *name)
 
     return strFriendList; // 返回查询到所有在线用户的姓名
 }
+
+bool OpeDB::handleDelFriend(const char *name, const char *friendName)
+{
+    if (NULL == name || NULL == friendName)
+    {
+        return false;
+    }
+    QString data = QString("delete from friend where id = (select id from userInfo where name =\'%1\') and friendId = (select id from userInfo where name =\'%2\')").arg(name).arg(friendName);
+    QSqlQuery query;
+    query.exec(data);
+
+    data = QString("delete from friend where id = (select id from userInfo where name =\'%1\') and friendId = (select id from userInfo where name =\'%2\')").arg(friendName).arg(name);
+    query.exec(data);
+
+    return true;
+
+}
